@@ -3,7 +3,11 @@
 import useSWR from "swr"
 import type { AlbumType } from "@/types"
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = async (url: string) => {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error("Failed to fetch data")
+  return res.json()
+}
 
 export function useAlbums(featured?: boolean) {
   const params = new URLSearchParams()

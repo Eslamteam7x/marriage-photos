@@ -13,6 +13,8 @@ interface AlbumCardProps {
 }
 
 export function AlbumCard({ album }: AlbumCardProps) {
+  if (!album || !album.slug) return null
+
   const imageCount = album._count?.images || 0
   const videoCount = album._count?.videos || 0
 
@@ -22,7 +24,7 @@ export function AlbumCard({ album }: AlbumCardProps) {
         <div className="relative aspect-[4/3] overflow-hidden">
           <OptimizedImage
             src={album.coverImage || "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80"}
-            alt={album.title}
+            alt={album.title || ""}
             fill
             className="object-cover group-hover:scale-110 transition-transform duration-700"
           />

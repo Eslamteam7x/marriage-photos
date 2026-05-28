@@ -9,10 +9,11 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
 export function RecentAlbums() {
-  const { albums, isLoading } = useAlbums(true)
-  const recentAlbums = albums?.slice(0, 4) || []
+  const { albums, isLoading, isError } = useAlbums(true)
+  const recentAlbums = Array.isArray(albums) ? albums.slice(0, 4) : []
 
   if (isLoading) return <PageLoader />
+  if (isError) return null
 
   return (
     <section className="py-20 md:py-28 px-4">
