@@ -215,3 +215,59 @@ model Setting {
 
   @@map("settings")
 }
+
+model WeddingPage {
+  id            String   @id @default(cuid())
+  slug          String   @unique @default("our-wedding")
+  brideName     String   @default("")
+  groomName     String   @default("")
+  eventDate     DateTime?
+  welcomeMessage String  @default("")
+  coverImage    String?
+  musicUrl      String?
+  isPrivate     Boolean  @default(true)
+  password      String?
+  allowDownload Boolean  @default(true)
+  themeColor    String   @default("#c9a96e")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  images WeddingImage[]
+  videos WeddingVideo[]
+
+  @@map("wedding_pages")
+}
+
+model WeddingImage {
+  id         String   @id @default(cuid())
+  url        String
+  publicId   String?
+  width      Int?
+  height     Int?
+  size       Int?
+  caption    String?
+  sortOrder  Int      @default(0)
+  isVideo    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  weddingId String
+  wedding   WeddingPage @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
+  @@map("wedding_images")
+}
+
+model WeddingVideo {
+  id        String   @id @default(cuid())
+  url       String
+  publicId  String?
+  thumbnail String?
+  title     String?
+  duration  Float?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  weddingId String
+  wedding   WeddingPage @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
+  @@map("wedding_videos")
+}

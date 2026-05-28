@@ -13,10 +13,12 @@ import {
   BarChart3,
   LogOut,
   Camera,
+  Heart,
 } from "lucide-react"
 
 const sidebarLinks = [
   { href: "/dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
+  { href: "/dashboard/wedding", label: "صفحة الزفاف", icon: Heart },
   { href: "/dashboard/albums", label: "الألبومات", icon: Images },
   { href: "/dashboard/upload", label: "رفع الملفات", icon: Upload },
   { href: "/dashboard/users", label: "المستخدمين", icon: Users },
