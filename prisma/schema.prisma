@@ -1,0 +1,217 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  PHOTOGRAPHER
+  CLIENT
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String?  @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          Role     @default(CLIENT)
+  phone         String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+  albums   Album[]
+  views    AlbumView[]
+  downloads Download[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Album {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?
+  coverImage  String?
+  eventDate   DateTime?
+  clientName  String?
+  password    String?
+  isPublic    Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  category    String?
+  views          Int      @default(0)
+  downloadCount  Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  userId     String?
+  user       User?        @relation(fields: [userId], references: [id])
+  images     Image[]
+  videos     Video[]
+  tags       AlbumTag[]
+  albumViews AlbumView[]
+  downloads  Download[]
+
+  @@map("albums")
+}
+
+model Image {
+  id          String   @id @default(cuid())
+  url         String
+  publicId    String?
+  blurHash    String?
+  width       Int?
+  height      Int?
+  format      String?
+  size        Int?
+  alt         String?
+  caption     String?
+  isFeatured  Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  albumId String
+  album     Album      @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  downloads Download[]
+
+  @@map("images")
+}
+
+model Video {
+  id          String   @id @default(cuid())
+  url         String
+  publicId    String?
+  thumbnail   String?
+  width       Int?
+  height      Int?
+  duration    Float?
+  size        Int?
+  title       String?
+  isReel      Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  albumId String
+  album   Album @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@map("videos")
+}
+
+model Tag {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  albums AlbumTag[]
+
+  @@map("tags")
+}
+
+model AlbumTag {
+  albumId String
+  tagId   String
+  album   Album @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  tag     Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([albumId, tagId])
+  @@map("album_tags")
+}
+
+model AlbumView {
+  id        String   @id @default(cuid())
+  albumId   String
+  userId    String?
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  album Album @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id])
+
+  @@map("album_views")
+}
+
+model Download {
+  id        String   @id @default(cuid())
+  albumId   String?
+  imageId   String?
+  userId    String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  album Album? @relation(fields: [albumId], references: [id])
+  user  User?  @relation(fields: [userId], references: [id])
+  image Image? @relation(fields: [imageId], references: [id])
+
+  @@map("downloads")
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("contacts")
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  type  String @default("string")
+
+  @@map("settings")
+}
