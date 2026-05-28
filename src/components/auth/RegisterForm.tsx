@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
 import { Input } from "@/components/ui/Input"
 import { Button } from "@/components/ui/Button"
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react"
@@ -29,11 +30,23 @@ export function RegisterForm() {
         body: JSON.stringify({ name, email, password }),
       })
 
-      if (res.ok) {
-        router.push("/dashboard")
-      } else {
+      if (!res.ok) {
         const data = await res.json()
         setError(data.message || "فشل إنشاء الحساب")
+        return
+      }
+
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setError("تم إنشاء الحساب ولكن فشل تسجيل الدخول، حاول تسجيل الدخول مباشرة")
+      } else {
+        router.push("/dashboard")
+        router.refresh()
       }
     } catch {
       setError("حدث خطأ، حاول مرة أخرى")

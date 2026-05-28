@@ -1,40 +1,32 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useSession, signIn, signOut } from "next-auth/react"
 import type { UserType } from "@/types"
 
 export function useAuth() {
-  const [user, setUser] = useState<UserType | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { data: session, status } = useSession()
 
-  useEffect(() => {
-    fetchUser()
-  }, [])
-
-  async function fetchUser() {
-    try {
-      const res = await fetch("/api/auth/me")
-      if (res.ok) {
-        const data = await res.json()
-        setUser(data.user)
+  const user: UserType | null = session?.user
+    ? {
+        id: session.user.id,
+        name: session.user.name || null,
+        email: session.user.email || null,
+        image: session.user.image || null,
+        role: (session.user.role as UserType["role"]) || "CLIENT",
+        phone: null,
+        isActive: true,
+        createdAt: "",
       }
-    } catch {
-      setUser(null)
-    } finally {
-      setLoading(false)
-    }
-  }
+    : null
 
   async function login(email: string, password: string) {
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
     })
-    if (!res.ok) throw new Error("Invalid credentials")
-    const data = await res.json()
-    setUser(data.user)
-    return data
+    if (result?.error) throw new Error("Invalid credentials")
+    return result
   }
 
   async function register(name: string, email: string, password: string) {
@@ -44,15 +36,18 @@ export function useAuth() {
       body: JSON.stringify({ name, email, password }),
     })
     if (!res.ok) throw new Error("Registration failed")
-    const data = await res.json()
-    setUser(data.user)
-    return data
+    return res.json()
   }
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" })
-    setUser(null)
+    await signOut({ callbackUrl: "/" })
   }
 
-  return { user, loading, login, register, logout, refetch: fetchUser }
+  return {
+    user,
+    loading: status === "loading",
+    login,
+    register,
+    logout,
+  }
 }

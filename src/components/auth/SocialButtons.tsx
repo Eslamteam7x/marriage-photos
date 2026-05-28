@@ -1,17 +1,10 @@
 "use client"
 
+import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/Button"
 import { Globe, GitBranch } from "lucide-react"
 
 export function SocialButtons() {
-  function handleGoogleLogin() {
-    window.location.href = "/api/auth/login/google"
-  }
-
-  function handleGithubLogin() {
-    window.location.href = "/api/auth/login/github"
-  }
-
   return (
     <div className="space-y-3">
       <div className="relative">
@@ -23,12 +16,12 @@ export function SocialButtons() {
         </div>
       </div>
 
-      <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>
+      <Button variant="outline" className="w-full" onClick={() => signIn("google", { callbackUrl: "/dashboard" })}>
         <Globe className="h-5 w-5" />
         تسجيل الدخول بـ Google
       </Button>
 
-      <Button variant="outline" className="w-full" onClick={handleGithubLogin}>
+      <Button variant="outline" className="w-full" onClick={() => signIn("github", { callbackUrl: "/dashboard" })}>
         <GitBranch className="h-5 w-5" />
         تسجيل الدخول بـ GitHub
       </Button>

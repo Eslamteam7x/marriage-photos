@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
 import { Input } from "@/components/ui/Input"
 import { Button } from "@/components/ui/Button"
 import { SocialButtons } from "./SocialButtons"
@@ -23,17 +24,17 @@ export function LoginForm() {
     const password = formData.get("password") as string
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
       })
 
-      if (res.ok) {
-        router.push("/dashboard")
+      if (result?.error) {
+        setError("البريد الإلكتروني أو كلمة المرور غير صحيحة")
       } else {
-        const data = await res.json()
-        setError(data.message || "بيانات الدخول غير صحيحة")
+        router.push("/dashboard")
+        router.refresh()
       }
     } catch {
       setError("حدث خطأ، حاول مرة أخرى")

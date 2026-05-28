@@ -1,12 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
 import { motion } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/Card"
 import { PageLoader } from "@/components/ui/Spinner"
 import { Images, Eye, Download, MessageSquare, Camera } from "lucide-react"
 
 export default function DashboardPage() {
+  const { data: session } = useSession()
   const [stats, setStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -30,7 +32,7 @@ export default function DashboardPage() {
     <div>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl md:text-3xl font-playfair font-bold mb-2">لوحة التحكم</h1>
-        <p className="text-muted-foreground mb-8">مرحباً بك في لوحة التحكم</p>
+        <p className="text-muted-foreground mb-8">مرحباً {session?.user?.name || "بك"} في لوحة التحكم</p>
       </motion.div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

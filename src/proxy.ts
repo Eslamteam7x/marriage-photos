@@ -1,16 +1,12 @@
+import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-const protectedPaths = ["/dashboard", "/dashboard/:path*"]
+export async function proxy(req: NextRequest) {
+  const session = await auth()
+  const isProtected = req.nextUrl.pathname.startsWith("/dashboard")
 
-export function proxy(req: NextRequest) {
-  const token = req.cookies.get("token")?.value
-  const isProtected = protectedPaths.some((path) => {
-    const pattern = path.replace(":path*", ".*")
-    return req.nextUrl.pathname.match(new RegExp(`^${pattern}$`))
-  })
-
-  if (isProtected && !token) {
+  if (isProtected && !session?.user) {
     const loginUrl = new URL("/auth/login", req.url)
     loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname)
     return NextResponse.redirect(loginUrl)
